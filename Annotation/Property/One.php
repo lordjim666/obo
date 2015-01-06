@@ -111,6 +111,32 @@ class One extends \obo\Annotation\Base\Property {
                         "actionArguments" => array("propertyName" => $this->propertyInformation->name),
                     )));
 
+//                \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->registerEvent(new \obo\Services\Events\Event(array(
+//                            "onClassWithName" => $this->entityInformation->className,
+//                            "name" => "afterChange" . \ucfirst($this->propertyInformation->name),
+//                            "actionAnonymousFunction" => function($arguments) {
+//
+//                                $propertyInformation = $arguments["entity"]->informationForPropertyWithName($arguments["propertyName"]);
+//				$currentPropertyValue = $arguments["entity"]->valueForPropertyWithName($arguments["propertyName"]);
+//
+//                                if ($arguments["propertyValue"]["new"] instanceof \obo\Entity) {
+//				    \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("beforeConnectToOwner", $entity, array("collection" => $this, "columnName" => $this->relationShip->ownerPropertyName));
+//                                    if ($this->targetEntityInProperty) $arguments["entity"]->setValueForPropertyWithName($arguments["propertyValue"]["new"]->className(), $propertyInformation->relationship->entityClassNameToBeConnectedInPropertyWithName);
+//				    \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("afterConnectToOwner", $entity, array("collection" => $this, "columnName" => $this->relationShip->ownerPropertyName));
+//				} elseif (\is_null($arguments["propertyValue"]["new"])) {
+//				    \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("beforeDisconnectToOwner", $currentPropertyValue, array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
+//    				    if ($this->targetEntityInProperty) $arguments["entity"]->setValueForPropertyWithName(null, $propertyInformation->relationship->entityClassNameToBeConnectedInPropertyWithName);
+//				    \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("afterDisconnectToOwner", $currentPropertyValue, array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
+//                                } else {
+//				    \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("beforeConnectToOwner", $currentPropertyValue, array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
+//
+//				    \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("afterConnectToOwner", $currentPropertyValue, array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
+//                                }
+//
+//                            },
+//                            "actionArguments" => array("propertyName" => $this->propertyInformation->name),
+//                        )));
+
             if ($this->targetEntityInProperty) {
                 \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->registerEvent(new \obo\Services\Events\Event(array(
                             "onClassWithName" => $this->entityInformation->className,
@@ -120,16 +146,20 @@ class One extends \obo\Annotation\Base\Property {
                                 $propertyInformation = $arguments["entity"]->informationForPropertyWithName($arguments["propertyName"]);
 
                                 if ($arguments["propertyValue"]["new"] instanceof \obo\Entity) {
+				    \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("beforeConnectToOwner", $arguments["entity"]->valueForPropertyWithName($arguments["propertyName"]), array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
+				    if ($arguments["propertyValue"]["old"] instanceof \obo\Entity) \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("beforeDisconnectFromOwner", $arguments["propertyValue"]["old"], array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
                                     $arguments["entity"]->setValueForPropertyWithName($arguments["propertyValue"]["new"]->className(), $propertyInformation->relationship->entityClassNameToBeConnectedInPropertyWithName);
-
+				    \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("afterConnectToOwner", $arguments["entity"]->valueForPropertyWithName($arguments["propertyName"]), array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
+				    if ($arguments["propertyValue"]["old"] instanceof \obo\Entity) \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("afterDisconnectFromOwner", $arguments["propertyValue"]["old"], array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
                                 } else {
+				    if ($arguments["propertyValue"]["old"] instanceof \obo\Entity) \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("beforeDisconnectFromOwner", $arguments["entity"]->valueForPropertyWithName($arguments["propertyName"]), array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
                                     $arguments["entity"]->setValueForPropertyWithName(null, $propertyInformation->relationship->entityClassNameToBeConnectedInPropertyWithName);
-
+				    if ($arguments["propertyValue"]["old"] instanceof \obo\Entity) \obo\Services::serviceWithName(\obo\obo::EVENT_MANAGER)->notifyEventForEntity("beforeDisconnectFromOwner", $arguments["entity"]->valueForPropertyWithName($arguments["propertyName"]), array("owner" => $arguments["entity"], "columnName" => $propertyInformation->columnName));
                                 }
 
                             },
                             "actionArguments" => array("propertyName" => $this->propertyInformation->name),
                         )));
-            }
+	    }
         }
     }
